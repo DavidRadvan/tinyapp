@@ -21,6 +21,17 @@ const generateRandomString = function() {
   return output;
 };
 
+const httpify = function(link) {
+  let output = link;
+  if (output.substring(0, 4) === "www.") {
+    output = "http://" + link;
+  }
+  if (output.substring(0, 11) !== "http://www." && output.substring(0, 12) !== "https://www.") {
+    output = "http://www." + link;
+  }
+  return output;
+};
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
@@ -60,12 +71,12 @@ app.get("/hello", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let newShort = generateRandomString();
-  urlDatabase[newShort] = req.body.longURL;
+  urlDatabase[newShort] = httpify(req.body.longURL);
   res.redirect(`/urls/${newShort}`);
 });
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id] = httpify(req.body.longURL);
   res.redirect(`/urls/${req.params.id}`);
 });
 
