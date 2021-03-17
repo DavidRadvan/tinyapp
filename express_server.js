@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const helper = require('./helpers.js');
+const methodOverride = require('method-override');
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -14,6 +15,8 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+
+app.use(methodOverride('_method'));
 
 app.set("view engine", "ejs");
 
@@ -137,14 +140,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newShort}`);
 });
 
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   if (req.session.userId === urlDatabase[req.params.id].userID) {
-    urlDatabase[req.params.id] = helper.httpify(req.body.longURL);
+    urlDatabase[req.params.id].longURL = helper.httpify(req.body.longURL);
   }
   res.redirect(`/urls/${req.params.id}`);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   if (req.session.userId === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL];
   }
