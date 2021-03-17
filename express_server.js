@@ -65,6 +65,16 @@ const emailLookup = function(email) {
   return false;
 };
 
+const urlsForUser = function(id) {
+  let output = {};
+  for (let url in urlDatabase) {
+    if (id === urlDatabase[url].userID) {
+      output[url] = urlDatabase[url];
+    }
+  }
+  return output;
+};
+
 
 app.post("/login", (req, res) => {
   if (!emailLookup(req.body.email)) {
@@ -105,7 +115,7 @@ app.post("/register", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
@@ -140,7 +150,14 @@ app.get("/urls/:shortURL", (req, res) => {
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL].longURL,
-      user: users[req.cookies["user_id"]]
+      user: users[req.cookies["user_id"]],
+      wrongUser: function() {
+        let output = false;
+        if (!urlsForUser(req.cookies["user_id"])[req.params.shortURL]) {
+          output = true;
+        }
+        return output;
+      }
     };
     res.render("urls_show", templateVars);
   } else {
@@ -169,17 +186,24 @@ app.get("/hello", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   let newShort = generateRandomString();
-  urlDatabase[newShort] = httpify(req.body.longURL);
+  urlDatabase[newShort] = {
+    longURL: httpify(req.body.longURL),
+    userID: req.cookies["user_id"]
+  };
   res.redirect(`/urls/${newShort}`);
 });
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = httpify(req.body.longURL);
+  if (req.cookies["user_id"] === urlDatabase[req.params.id].userID) {
+    urlDatabase[req.params.id] = httpify(req.body.longURL);
+  }
   res.redirect(`/urls/${req.params.id}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+  }
   res.redirect('/urls');
 });
 
