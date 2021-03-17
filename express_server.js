@@ -24,6 +24,8 @@ const urlDatabase = {};
 
 const users = {};
 
+const analytics = {};
+
 
 app.post("/login", (req, res) => {
   if (!helper.emailLookup(req.body.email, users)) {
@@ -99,6 +101,7 @@ app.get("/urls/:shortURL", (req, res) => {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL].longURL,
       user: users[req.session.userId],
+      analytics: analytics[req.params.shortURL],
       wrongUser: function() {
         let output = false;
         if (!helper.urlsForUser(req.session.userId, urlDatabase)[req.params.shortURL]) {
@@ -115,6 +118,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  analytics[req.params.shortURL].visits += 1;
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
@@ -136,6 +140,11 @@ app.post("/urls", (req, res) => {
   urlDatabase[newShort] = {
     longURL: helper.httpify(req.body.longURL),
     userID: req.session.userId
+  };
+  analytics[newShort] = {
+    visits: 0,
+    uniqueVisits: 0,
+    visitTracker: []
   };
   res.redirect(`/urls/${newShort}`);
 });
