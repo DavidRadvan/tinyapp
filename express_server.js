@@ -50,17 +50,32 @@ const httpify = function(link) {
   return output;
 };
 
+const emailLookup = function(email) {
+  for (let user in users) {
+    if (email, users[user].email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect('/urls');
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect('urls');
 });
 
 app.post("/register", (req, res) => {
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send("Error - email or password left blank.");
+  }
+  if (emailLookup(req.body.email)) {
+    res.status(400).send("Error - email already registered.");
+  }
   let newID = generateRandomString();
   users[newID] = {
     id: newID,
@@ -75,23 +90,30 @@ app.post("/register", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_login", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -99,11 +121,11 @@ app.get("/urls/:shortURL", (req, res) => {
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL],
-      username: req.cookies["username"]
+      user: users[req.cookies["user_id"]]
     };
     res.render("urls_show", templateVars);
   } else {
-    res.send(`Error 404 - ${req.params.shortURL} not found.`);
+    res.status(404).send(`Error 404 - ${req.params.shortURL} not found.`);
   }
 
 });
