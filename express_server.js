@@ -52,15 +52,22 @@ const httpify = function(link) {
 
 const emailLookup = function(email) {
   for (let user in users) {
-    if (email, users[user].email) {
-      return true;
+    if (email === users[user].email) {
+      return users[user];
     }
   }
   return false;
 };
 
+
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  if (!emailLookup(req.body.email)) {
+    res.status(403).send("Error - email not found.");
+  }
+  if (req.body.password !== emailLookup(req.body.email).password) {
+    res.status(403).send("Error - incorrect password.");
+  }
+  res.cookie("user_id", emailLookup(req.body.email).id);
   res.redirect('/urls');
 });
 
@@ -70,8 +77,11 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (req.body.email === "" || req.body.password === "") {
-    res.status(400).send("Error - email or password left blank.");
+  if (req.body.email === "") {
+    res.status(400).send("Error - email left blank.");
+  }
+  if (req.body.password === "") {
+    res.status(400).send("Error - password left blank.");
   }
   if (emailLookup(req.body.email)) {
     res.status(400).send("Error - email already registered.");
