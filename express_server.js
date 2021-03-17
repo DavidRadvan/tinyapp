@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -12,29 +13,9 @@ app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW"
-  }
-};
+const urlDatabase = {};
 
-const users = {
-  "aJ48lW": {
-    id: "aJ48lW",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
+const users = {};
 
 const generateRandomString = function() {
   let alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -80,7 +61,7 @@ app.post("/login", (req, res) => {
   if (!emailLookup(req.body.email)) {
     res.status(403).send("Error - email not found.");
   }
-  if (req.body.password !== emailLookup(req.body.email).password) {
+  if (!bcrypt.compareSync(req.body.password, emailLookup(req.body.email).password)) {
     res.status(403).send("Error - incorrect password.");
   }
   res.cookie("user_id", emailLookup(req.body.email).id);
@@ -106,7 +87,7 @@ app.post("/register", (req, res) => {
   users[newID] = {
     id: newID,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, 10)
   };
   res.cookie("user_id", newID);
   console.log(users);
@@ -208,5 +189,5 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyURL server listening on port ${PORT}!`);
 });
