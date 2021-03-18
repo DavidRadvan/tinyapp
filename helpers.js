@@ -1,3 +1,5 @@
+// emailLookup - uses a user's email to find and return that user's object with the userDatabase.
+
 const emailLookup = function(email, database) {
   for (let user in database) {
     if (email === database[user].email) {
@@ -7,6 +9,8 @@ const emailLookup = function(email, database) {
   return false;
 };
 
+// generateRandomString - generates a random 6-digit alphanumeric string, for URL and cookie generation.
+
 const generateRandomString = function() {
   let alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let output = "";
@@ -15,6 +19,8 @@ const generateRandomString = function() {
   }
   return output;
 };
+
+// hasVisited - used by analytics to see if a visitor to the link has previously visited or not.
 
 const hasVisited = function(userId, database) {
   for (let i = 0; i < database.length; i++) {
@@ -27,6 +33,8 @@ const hasVisited = function(userId, database) {
   return false;
 };
 
+// httpify - used to ensure all URLs have the http://www. or https://www. prefix
+
 const httpify = function(link) {
   let output = link;
   if (output.substring(0, 4) === "www.") {
@@ -37,6 +45,8 @@ const httpify = function(link) {
   }
   return output;
 };
+
+// urlsForUser - used to scan the urlDatabase and returns all URLs owned by the id in an object
 
 const urlsForUser = function(id, database) {
   let output = {};

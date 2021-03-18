@@ -11,7 +11,7 @@
 
   <%- include('partials/_header') %>
   <% if(user && wrongUser()) { %>
-    <h2>Access denied - you are not the owner of this URL.</h2>
+    <h2 style="text-align: center; margin-top: 2em;">Access denied - you are not the owner of this URL.</h2>
     <% } %>
     <% if(user && !wrongUser()) { %>
   <div class="card text-center">
@@ -32,13 +32,14 @@
       </div>
     </form>
   </div>
-  <div class="p-3 mb-2 text-dark text-center">
-    <h3 class="text-secondary">Analytics</h3>
-      <h4>Visits: <%= analytics.visits %></h4>
-      <h4>Unique Visits: <%= analytics.uniqueVisits %></h4>
-      <h4>Visit History:</h4>
+  <div class="p-3 mb-2">
+    <div class="text-center">
+    <h3>Analytics</h3>
+      <h5 style="margin-top: 1em;">Visits: <%= analytics.visits %></h5>
+      <h5 style="margin-top: 1em; margin-bottom: 1em;">Unique Visits: <%= analytics.uniqueVisits %></h5>
+      </div>
       <table class="table">
-        <thead>
+        <thead class="thead-light">
           <tr>
             <th scope="col">Visit Date and Time</th>
             <th scope="col">Visitor ID</th>
@@ -46,7 +47,7 @@
         </thead>
         <tbody>
           <% for(let i = 0; i < analytics.visitTracker.length; i++) { %>
-            <tr>
+            <tr class="table-light">
               <td><%= analytics.visitTracker[i][0] %></td>
               <td><%= analytics.visitTracker[i][1] %></td>
             </tr>

@@ -1,3 +1,4 @@
+// Project requirements
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -8,6 +9,7 @@ const helper = require('./helpers.js');
 const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
 
+// app.use
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -23,48 +25,15 @@ app.use(methodOverride('_method'));
 
 app.set("view engine", "ejs");
 
+// Global databases
+
 const urlDatabase = {};
 
 const users = {};
 
 const analytics = {};
 
-
-app.post("/login", (req, res) => {
-  if (!helper.emailLookup(req.body.email, users)) {
-    res.status(403).send("Error - email not found.");
-  }
-  if (!bcrypt.compareSync(req.body.password, helper.emailLookup(req.body.email, users).password)) {
-    res.status(403).send("Error - incorrect password.");
-  }
-  req.session.userId = helper.emailLookup(req.body.email, users).id;
-  res.redirect('/urls');
-});
-
-app.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect('urls');
-});
-
-app.post("/register", (req, res) => {
-  if (req.body.email === "") {
-    res.status(400).send("Error - email left blank.");
-  }
-  if (req.body.password === "") {
-    res.status(400).send("Error - password left blank.");
-  }
-  if (helper.emailLookup(req.body.email, users)) {
-    res.status(400).send("Error - email already registered.");
-  }
-  let newID = helper.generateRandomString();
-  users[newID] = {
-    id: newID,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 10)
-  };
-  req.session.userId = newID;
-  res.redirect('/urls');
-});
+// app.get for managing GET requests
 
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -148,6 +117,44 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+// app.post for managing POST requests
+
+app.post("/login", (req, res) => {
+  if (!helper.emailLookup(req.body.email, users)) {
+    res.status(403).send("Error - email not found.");
+  }
+  if (!bcrypt.compareSync(req.body.password, helper.emailLookup(req.body.email, users).password)) {
+    res.status(403).send("Error - incorrect password.");
+  }
+  req.session.userId = helper.emailLookup(req.body.email, users).id;
+  res.redirect('/urls');
+});
+
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect('urls');
+});
+
+app.post("/register", (req, res) => {
+  if (req.body.email === "") {
+    res.status(400).send("Error - email left blank.");
+  }
+  if (req.body.password === "") {
+    res.status(400).send("Error - password left blank.");
+  }
+  if (helper.emailLookup(req.body.email, users)) {
+    res.status(400).send("Error - email already registered.");
+  }
+  let newID = helper.generateRandomString();
+  users[newID] = {
+    id: newID,
+    email: req.body.email,
+    password: bcrypt.hashSync(req.body.password, 10)
+  };
+  req.session.userId = newID;
+  res.redirect('/urls');
+});
+
 app.post("/urls", (req, res) => {
   let newShort = helper.generateRandomString();
   urlDatabase[newShort] = {
@@ -162,6 +169,8 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newShort}`);
 });
 
+// app.put for managing PUT requests
+
 app.put("/urls/:id", (req, res) => {
   if (req.session.userId === urlDatabase[req.params.id].userID) {
     urlDatabase[req.params.id].longURL = helper.httpify(req.body.longURL);
@@ -169,12 +178,16 @@ app.put("/urls/:id", (req, res) => {
   res.redirect(`/urls/${req.params.id}`);
 });
 
+// app.delete for managing DELETE requests
+
 app.delete("/urls/:shortURL", (req, res) => {
   if (req.session.userId === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL];
   }
   res.redirect('/urls');
 });
+
+// app.listen for server setup
 
 app.listen(PORT, () => {
   console.log(`TinyURL server listening on port ${PORT}!`);
