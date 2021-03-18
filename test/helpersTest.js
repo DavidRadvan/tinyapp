@@ -45,6 +45,20 @@ describe('generateRandomString', function() {
   });
 });
 
+describe('hasVisited', function() {
+  const datab = [["date", "FXXYZ"], ["date", "YYJSZ"], ["date", "FFXXYZ"], ["date", "LOPDZ"]];
+
+  it('should return true if the visitor has visited', function() {
+    let user = helper.hasVisited("YYJSZ", datab);
+    assert.strictEqual(user, true);
+  });
+
+  it('return false if user has not hasVisited', function() {
+    let user = helper.hasVisited("OPOPO", datab);
+    assert.strictEqual(user, false);
+  });
+});
+
 describe('httpify', function() {
   it('should add http:// if not already present', function() {
     const url = helper.httpify("www.youtube.com");

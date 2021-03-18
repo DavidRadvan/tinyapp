@@ -16,6 +16,17 @@ const generateRandomString = function() {
   return output;
 };
 
+const hasVisited = function(userId, database) {
+  for (let i = 0; i < database.length; i++) {
+    for (let j = 0; j < database[i].length; j++) {
+      if (userId === database[i][j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 const httpify = function(link) {
   let output = link;
   if (output.substring(0, 4) === "www.") {
@@ -37,4 +48,4 @@ const urlsForUser = function(id, database) {
   return output;
 };
 
-module.exports = { emailLookup, generateRandomString, httpify, urlsForUser };
+module.exports = { emailLookup, generateRandomString, hasVisited, httpify, urlsForUser };

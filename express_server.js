@@ -6,6 +6,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const helper = require('./helpers.js');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -15,6 +16,8 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+
+app.use(cookieParser());
 
 app.use(methodOverride('_method'));
 
@@ -119,6 +122,16 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   analytics[req.params.shortURL].visits += 1;
+  if (!req.cookies["visitorID"]) {
+    const newVisitorID = helper.generateRandomString();
+    res.cookie("visitorID", newVisitorID);
+  }
+  if (!helper.hasVisited(req.cookies["visitorID"], analytics[req.params.shortURL].visitTracker)) {
+    analytics[req.params.shortURL].uniqueVisits += 1;
+  }
+  const dateTime = new Date();
+  dateTime.toUTCString();
+  analytics[req.params.shortURL].visitTracker.push([dateTime, req.cookies["visitorID"]]);
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
