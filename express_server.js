@@ -74,6 +74,7 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: urlDatabase[req.params.shortURL].longURL,
       user: users[req.session.userId],
       analytics: analytics[req.params.shortURL],
+      date: urlDatabase[req.params.shortURL].dateCreated,
       wrongUser: function() {
         let output = false;
         if (!helper.urlsForUser(req.session.userId, urlDatabase)[req.params.shortURL]) {
@@ -106,7 +107,10 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (users[req.session.userId]) {
+    res.redirect("/urls");
+  }
+  res.redirect("/login");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -157,9 +161,12 @@ app.post("/register", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let newShort = helper.generateRandomString();
+  let dateCreated = new Date();
+  dateCreated.toUTCString();
   urlDatabase[newShort] = {
     longURL: helper.httpify(req.body.longURL),
-    userID: req.session.userId
+    userID: req.session.userId,
+    dateCreated: dateCreated
   };
   analytics[newShort] = {
     visits: 0,
