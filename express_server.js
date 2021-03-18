@@ -136,7 +136,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect('urls');
+  res.redirect('/urls');
 });
 
 app.post("/register", (req, res) => {
@@ -182,7 +182,7 @@ app.put("/urls/:id", (req, res) => {
   if (req.session.userId === urlDatabase[req.params.id].userID) {
     urlDatabase[req.params.id].longURL = helper.httpify(req.body.longURL);
   }
-  res.redirect(`/urls/${req.params.id}`);
+  res.redirect(`/urls`);
 });
 
 // app.delete for managing DELETE requests
