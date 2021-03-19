@@ -183,25 +183,24 @@ app.post("/urls", (req, res) => {
     res.status(401).send("Error - unauthorized access. Please log in to view your URLs.");
   }
 
-  if (req.session.userID) {
-    let newShort = helper.generateRandomString();
-    let dateCreated = new Date();
-    dateCreated.toUTCString();
+  let newShort = helper.generateRandomString();
+  let dateCreated = new Date();
+  dateCreated.toUTCString();
 
-    urlDatabase[newShort] = {
-      longURL: helper.httpify(req.body.longURL),
-      userID: req.session.userId,
-      dateCreated: dateCreated
-    };
+  urlDatabase[newShort] = {
+    longURL: helper.httpify(req.body.longURL),
+    userID: req.session.userId,
+    dateCreated: dateCreated
+  };
 
-    analytics[newShort] = {
-      visits: 0,
-      uniqueVisits: 0,
-      visitTracker: []
-    };
+  analytics[newShort] = {
+    visits: 0,
+    uniqueVisits: 0,
+    visitTracker: []
+  };
 
-    res.redirect(`/urls/${newShort}`);
-  }
+  res.redirect(`/urls/${newShort}`);
+
 });
 
 app.put("/urls/:id", (req, res) => {
